@@ -63,8 +63,8 @@ Here are the evaluation metrics—Accuracy and Recall (Sensitivity)—for variou
 | Random Forest                | 0.8667   | 0.9697               |
 | Support Vector Machine (SVM) | 0.8667   | 0.9697               |
 | XGBoost                      | 0.8667   | 0.9429               |
-| Rule Induction               | -        | -                    |
-| Neural Net                   | -        | -                    |
+| Rule Induction               | 0.8000   | -                    |
+| Neural Net                   | 0.8000   | -                    |
 
 Random Forest and SVM showed identical accuracy and recall scores. Due to its simplicity, Random Forest was chosen for heart attack prediction. The feature importance plot below highlights influential predictors:
 

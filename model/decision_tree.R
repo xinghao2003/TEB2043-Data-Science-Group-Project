@@ -1,14 +1,12 @@
-library(mice) # library for impute
+library(mice)
 library(tidyverse)
 library(dplyr)
 library(dlookr)
-library(caret) 
-
-library(rpart) # For decision tree model
-library(rpart.plot) # For data visualization
+library(caret)
+library(rpart)
+library(rpart.plot)
 
 # Load variables into global environments from dataset.RData
-# These variables were prepared in dataset.R
 load("dataset/dataset.RData")
 
 # Predict from model and calculate its accuracy
@@ -21,54 +19,62 @@ predict_accuracy <- function(model, test_df) {
 
 # Classification Decision Tree Model
 class_tree <- function(train, test, control = rpart.control(cp = 0.008)) {
-  # Fit A Classification Tree
-  fit.tree = rpart(output ~ ., data=train, method = "class", control = control)
-  # Visualizing the unpruned tree
+  fit.tree = rpart(output ~ ., data = train, method = "class", control = control)
   rpart.plot(fit.tree)
-  # Checking the order of variable importance
   print(fit.tree$variable.importance)
-  # Predict Using the unpruned tree
   pred.tree = predict(fit.tree, test, type = "class")
-  # Evaluate the Performance of the Classification Tree
   pred.tree.matrix = table(pred.tree, test$output)
   print(confusionMatrix(pred.tree.matrix))
   plotcp(fit.tree)
   printcp(fit.tree)
-  # Explicitly request the lowest cp value
-  print(fit.tree$cptable[which.min(fit.tree$cptable[,"xerror"]),"CP"])
-  # Selecting the lowest cp value, and fit a classification tree
-  bestcp <- fit.tree$cptable[which.min(fit.tree$cptable[,"xerror"]),"CP"]
+  print(fit.tree$cptable[which.min(fit.tree$cptable[,"xerror"]), "CP"])
+  bestcp <- fit.tree$cptable[which.min(fit.tree$cptable[,"xerror"]), "CP"]
   pruned.tree <- prune(fit.tree, cp = bestcp)
-  # Visualizing the pruned tree
   rpart.plot(pruned.tree)
-  # Predict Using the pruned tree
-  pred.prune = predict(pruned.tree, test, type="class")
-  # Evaluate the Performance of the Classification Tree
+  pred.prune = predict(pruned.tree, test, type = "class")
   pred.prune.matrix = table(pred.prune, test$output)
   print(confusionMatrix(pred.tree.matrix))
+  return(list(model = pruned.tree, accuracy = confusionMatrix(pred.prune.matrix)$overall["Accuracy"]))
 }
 
 # Setting seed for reproducible
 set.seed(seed)
 
-# Generate partition for train and test dataset
-r_train <- createDataPartition(df$output, p = 0.7, list = FALSE)
+# Number of iterations
+num_iterations <- 5
+models <- list()
 
-train_df = df[r_train,]
-test_df = df[-r_train,]
+for (i in 1:num_iterations) {
+  # Generate partition for train and test dataset
+  r_train <- createDataPartition(df$output, p = 0.7, list = FALSE)
+  
+  train_df = df[r_train,]
+  test_df = df[-r_train,]
+  
+  # Standardize numeric features
+  df_p <- df
+  numeric_features <- c("age", "trtbps", "chol", "thalachh", "oldpeak")
+  df_p[numeric_features] <- scale(df_p[numeric_features])
+  # Convert categorical variables to factors
+  categorical_variables <- c("sex", "cp", "fbs", "restecg", "exng", "slp", "caa", "thall", "output")
+  df_p[categorical_variables] <- lapply(df_p[categorical_variables], factor)
+  sapply(df_p, class)
+  train_df_p = df_p[r_train,]
+  test_df_p = df_p[-r_train,]
+  
+  # Classification Decision Tree
+  control <- rpart.control(cp = 0.0001)
+  result <- class_tree(train_df_p, test_df_p, control)
+  models[[i]] <- result
+}
 
-# Standardize numeric features
-df_p <- df
-numeric_features <- c("age", "trtbps", "chol", "thalachh", "oldpeak")
-df_p[numeric_features] <- scale(df_p[numeric_features])
-# Convert categorical variables to factors
-categorical_variables <- c("sex", "cp", "fbs", "restecg", "exng", "slp", "caa", "thall", "output")
-df_p[categorical_variables] <- lapply(df_p[categorical_variables], factor)
-sapply(df_p,class)
-train_df_p = df_p[r_train,]
-test_df_p = df_p[-r_train,]
+# Display the accuracy of each model
+for (i in 1:num_iterations) {
+  cat("Accuracy for Model", i, ":", models[[i]]$accuracy, "\n")
+}
 
-# Classification Decision Tree
-control <- rpart.control(cp = 0.0001)
-class_tree(train_df, test_df, control) # 0.8
-class_tree(train_df_p, test_df_p, control) # 0.8
+#Accuracy for Model 1 : 0.8 
+#Accuracy for Model 2 : 0.7333333 
+#Accuracy for Model 3 : 0.6777778 
+#Accuracy for Model 4 : 0.7333333 
+#Accuracy for Model 5 : 0.8

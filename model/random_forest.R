@@ -146,6 +146,6 @@ sorted_feature_names <- feature_names[sorted_indices]
 # Plotting the feature importance as a bar chart with inverted axes and vertical y-axis labels
 barplot(sorted_importance, names.arg = sorted_feature_names, 
         main = "Final Model (Random Forest) Feature Importance",
-        xlab = "Importance Score", ylab = "Features",
+        xlab = "Importance Score",
         col = "skyblue", horiz = TRUE, las = 2)
 

@@ -1,31 +1,57 @@
-library(mice) # library for impute
-library(tidyverse)
+library(mice)
 library(dplyr)
 library(dlookr)
-library(caret) 
-
+library(caret)
 library(class)
 
-load("dataset/dataset.RData")
+# Set seed for reproducibility
+seed <- 123
 
-# Predict from model and calculate its accuracy
-predict_accuracy <- function(model, test_df) {
-  predictions <- predict(model, test_df)
-  plot(predictions)
-  pred.matrix = table(test_df$output, predictions)
-  print(confusionMatrix(pred.matrix))
+# Load dataset from 'dataset.RData'
+load("dataset.RData")
+
+# Data Cleaning (if needed)
+df <- unique(df)
+md.pattern(df, rotate.names = TRUE)
+
+# Create train/test sets (70/30 split) with set.seed
+set.seed(seed)
+r_train <- createDataPartition(df$output, p = 0.7, list = FALSE)
+train_df <- df[r_train,]
+test_df <- df[-r_train,]
+
+# Standardize numeric features
+numeric_features <- c("age", "trestbps", "chol", "thalach", "oldpeak")
+train_df_std <- train_df
+test_df_std <- test_df
+set.seed(seed)  # Set seed for reproducibility
+train_df_std[, numeric_features] <- scale(train_df_std[, numeric_features])
+test_df_std[, numeric_features] <- scale(test_df_std[, numeric_features])
+
+# KNN Model
+k <- 5  # Choosing the number of neighbors
+num_iterations <- 5  # Number of times to train the model
+
+# Function to train and evaluate kNN model
+train_evaluate_knn <- function(train_data, test_data, k_value) {
+  set.seed(seed)  # Set seed for reproducibility
+  knn_model <- knn(train = train_data[, -which(names(train_data) %in% "output")], 
+                   test = test_data[, -which(names(test_data) %in% "output")], 
+                   cl = train_data$output, k = k_value)
+  accuracy <- mean(knn_model == test_data$output)
+  return(accuracy)
 }
 
-# KNN
-# Training the KNN model
-k <- 5 # Choosing the number of neighbors
-set.seed(seed)
-knn_model <- knn(train = train_features, test = test_features, cl = train_target, k = k)
-# Calculating accuracy
-accuracy <- mean(knn_model == test_target)
-cat("Accuracy:", accuracy) # 0.6
-set.seed(seed)
-knn_model <- knn(train = train_features_p, test = test_features_p, cl = train_target_p, k = k)
-# Calculating accuracy
-accuracy <- mean(knn_model == test_target_p)
-cat("Accuracy:", accuracy) # 0.8333
+# Original Features
+accuracy_original <- numeric(num_iterations)
+for (i in 1:num_iterations) {
+  accuracy_original[i] <- train_evaluate_knn(train_df, test_df, k)
+}
+cat("Average Accuracy (Original Features):", mean(accuracy_original), "\n")  # Print average accuracy
+
+# Standardized Features
+accuracy_standardized <- numeric(num_iterations)
+for (i in 1:num_iterations) {
+  accuracy_standardized[i] <- train_evaluate_knn(train_df_std, test_df_std, k)
+}
+cat("Average Accuracy (Standardized Features):", mean(accuracy_standardized), "\n")  # Print average accuracy
