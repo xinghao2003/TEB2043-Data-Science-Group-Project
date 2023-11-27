@@ -58,13 +58,13 @@ Here are the evaluation metrics—Accuracy and Recall (Sensitivity)—for variou
 | ---------------------------- | -------- | -------------------- |
 | Decision Tree                | 0.8000   | -                    |
 | K-Nearest Neighbors (kNN)    | 0.8333   | -                    |
-| Logistic Regression          | 0.8132   | -                    |
-| Naïve Bayes                  | 0.8022   | -                    |
+| Logistic Regression          | 0.8333   | -                    |
+| Naïve Bayes                  | 0.8000   | -                    |
 | Random Forest                | 0.8667   | 0.9697               |
 | Support Vector Machine (SVM) | 0.8667   | 0.9697               |
 | XGBoost                      | 0.8667   | 0.9429               |
 | Rule Induction               | 0.8000   | -                    |
-| Neural Net                   | 0.8000   | -                    |
+| Neural Net                   | 0.8444   | -                    |
 
 Random Forest and SVM showed identical accuracy and recall scores. Due to its simplicity, Random Forest was chosen for heart attack prediction. The feature importance plot below highlights influential predictors:
 
