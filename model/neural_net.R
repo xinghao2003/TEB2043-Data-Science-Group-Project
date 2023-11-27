@@ -39,31 +39,30 @@ nn_model <- function(train_df, test_df, layer, linear = FALSE) {
 
 # Neural Network
 set.seed(seed)
-nn_model(train_df, test_df, c(13, 7, 3)) # 0.7033,0.6923
+nn_model(train_df, test_df, c(13, 7, 3)) 
 set.seed(seed)
-nn_model(train_df, test_df, c(13, 7)) # 0.6154, 0.7033
+nn_model(train_df, test_df, c(13, 7)) 
 set.seed(seed)
-nn_model(train_df, test_df, c(7, 3)) # 0.7692, 0.7363
+nn_model(train_df, test_df, c(7, 3)) 
 set.seed(seed)
-nn_model(train_df, test_df, c(7)) # 0.6593, 0.6703
+nn_model(train_df, test_df, c(7)) 
 
-# Example: Scaling numeric features
+df_p <- df
+# Standardize numeric features
 numeric_features <- c("age", "trtbps", "chol", "thalachh", "oldpeak")
-heart_scaled <- heart
-heart_scaled[numeric_features] <- scale(heart_scaled[numeric_features])
+df_p[numeric_features] <- scale(df_p[numeric_features])
 
-# Example: Create 'train_df_scaled'
-set.seed(123)
-train_indices <- createDataPartition(heart_scaled$output, p = 0.7, list = FALSE)
-train_df_scaled <- heart_scaled[train_indices, ]
-test_df_scaled <- heart_scaled[-train_indices, ]
+# Create training and testing dataset
+train_df_scaled <- df_p[r_train,]
+test_df_scaled <- df_p[-r_train,]
 
-# Neural Network with scaled data excluded "output"
+# Neural Network with scaled data
 set.seed(seed)
-nn_model(train_df_scaled, test_df_scaled, c(13, 7, 3)) # 0.7912, 0.7802
+nn_model(train_df_scaled, test_df_scaled, c(13, 7, 3)) 
 set.seed(seed)
-nn_model(train_df_scaled, test_df_scaled, c(13, 7)) # 0.8132, 0.8022
+nn_model(train_df_scaled, test_df_scaled, c(13, 7)) 
 set.seed(seed)
-nn_model(train_df_scaled, test_df_scaled, c(7, 3)) # 0.7692, 0.7582
+nn_model(train_df_scaled, test_df_scaled, c(7, 3)) 
 set.seed(seed)
-nn_model(train_df_scaled, test_df_scaled, c(7)) # 0.7912, 0.8043
+nn_model(train_df_scaled, test_df_scaled, c(7)) 
+
