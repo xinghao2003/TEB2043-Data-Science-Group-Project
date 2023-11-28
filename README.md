@@ -1,6 +1,6 @@
 # Heart Attack Risk Prediction
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mW4J4SP_nEk" frameborder="0" allowfullscreen></iframe>
+[![Presentation Video](https://img.youtube.com/vi/mW4J4SP_nEk/0.jpg)](https://www.youtube.com/watch?v=mW4J4SP_nEk)
 
 ## Problem and Solution
 
